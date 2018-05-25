@@ -25,9 +25,6 @@ import static com.example.carlo.applectorrss.activities.ArticleDetail.KEY_TITLE;
 import static com.example.carlo.applectorrss.activities.ArticleDetail.KEY_URL;
 
 
-/**
- * A simple {@link Fragment} subclass.
- */
 public class ArticleDetailFragment extends Fragment {
 
 

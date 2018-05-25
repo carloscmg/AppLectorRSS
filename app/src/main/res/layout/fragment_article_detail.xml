@@ -17,33 +17,33 @@
 
             <ImageView
                 android:layout_width="match_parent"
-                android:layout_height="220dp"
+                android:layout_height="@dimen/detailImageHeight"
                 android:scaleType="fitXY"
                 android:id="@+id/imageDetail"/>
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_margin="10dp"
+                android:layout_margin="@dimen/marginTextTitleDetail"
                 android:id="@+id/titleDetail"
                 android:textStyle="bold"
-                android:textSize="25dp"
+                android:textSize="@dimen/titleSizeDetail"
                 android:textColor="@android:color/black"/>
 
 
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_margin="10dp"
+                android:layout_margin="@dimen/marginTextDescriptionDetail"
                 android:id="@+id/descriptionDetail"
-                android:textSize="15dp"
+                android:textSize="@dimen/descriptionTextSizeDetail"
                 android:layout_gravity="center_vertical|right"
                 android:textColor="@android:color/black"/>
             <View
                 android:layout_width="match_parent"
-                android:layout_height="2dp"
+                android:layout_height="@dimen/viewDetailSeparator"
                 android:background="@android:color/black"
-                android:layout_marginStart="10dp"
-                android:layout_marginEnd="10dp"/>
+                android:layout_marginStart="@dimen/marginView"
+                android:layout_marginEnd="@dimen/marginViewEnd"/>
             <Button
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

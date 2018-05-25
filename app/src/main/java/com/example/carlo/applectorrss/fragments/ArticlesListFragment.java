@@ -2,7 +2,9 @@ package com.example.carlo.applectorrss.fragments;
 
 
 import android.app.FragmentTransaction;
+import android.arch.persistence.room.Room;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -21,6 +23,7 @@ import com.example.carlo.applectorrss.BuildConfig;
 import com.example.carlo.applectorrss.R;
 import com.example.carlo.applectorrss.activities.ArticleDetail;
 import com.example.carlo.applectorrss.adapters.ArticlesAdapter;
+import com.example.carlo.applectorrss.database.ArticlesDatabase;
 import com.example.carlo.applectorrss.model.Article;
 import com.example.carlo.applectorrss.model.Articles;
 import com.example.carlo.applectorrss.network.GsonRequest;
@@ -31,6 +34,7 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
 
+
 import static com.example.carlo.applectorrss.activities.ArticleDetail.KEY_AUTHOR;
 import static com.example.carlo.applectorrss.activities.ArticleDetail.KEY_DATE;
 import static com.example.carlo.applectorrss.activities.ArticleDetail.KEY_DESCRIPTION;
@@ -38,10 +42,12 @@ import static com.example.carlo.applectorrss.activities.ArticleDetail.KEY_IMAGE;
 import static com.example.carlo.applectorrss.activities.ArticleDetail.KEY_TITLE;
 import static com.example.carlo.applectorrss.activities.ArticleDetail.KEY_URL;
 
-/**
- * A simple {@link Fragment} subclass.
- */
+
 public class ArticlesListFragment extends Fragment {
+
+    private static final String DB_NAME = "local_news";
+
+    private static ArticlesDatabase db;
 
     private ProgressBar progressBar;
     private RecyclerView recyclerView;
@@ -79,11 +85,14 @@ public class ArticlesListFragment extends Fragment {
         setLoading(true);
 
 
+
+
         GsonRequest gsonRequest = new GsonRequest<>(BuildConfig.API_URL, Articles.class, null, new Response.Listener<Articles>() {
 
             @Override
             public void onResponse(Articles articles) {
                 setLoading(false);
+                deleteArticles();
 
                 if (articles !=null){
                     //I sort the array even though the data provider already gives me the sorted data.
@@ -106,6 +115,15 @@ public class ArticlesListFragment extends Fragment {
 
                     articlesArray = articles.getArticles();
 
+                    if (articlesArray != null) {
+
+                        for (Article a: articlesArray) {
+                            db = Room.databaseBuilder(getActivity(), ArticlesDatabase.class, DB_NAME).build();
+                            InsertTask insertTask = new InsertTask();
+                            insertTask.execute(a);
+                        }
+                    }
+
                     if(dualPanel){
                         showDetail(0);
                     }
@@ -126,10 +144,88 @@ public class ArticlesListFragment extends Fragment {
             public void onErrorResponse(VolleyError error) {
                 setLoading(false);
                 Log.e("ERROR",error.toString());
+
+                //Persistence
+                setLoading(false);
+
+                getAllArticles();
+
             }
         });
 
         RequestsManager.getInstance().addToRequestQueue(getActivity(), gsonRequest);
+    }
+
+    private void getAllArticles() {
+
+        db = Room.databaseBuilder(getActivity().getApplicationContext(), ArticlesDatabase.class, DB_NAME).build();
+        GetArticlesAsyncTask selectAsyncTask = new GetArticlesAsyncTask();
+        selectAsyncTask.execute();
+
+    }
+
+    private  class GetArticlesAsyncTask extends AsyncTask<Void, Integer, Article[]> {
+
+        @Override
+        protected Article[] doInBackground(Void... voids) {
+            return db.ArticlesDao().getAll();
+        }
+
+        @Override
+        protected void onPostExecute(Article[] articles) {
+            super.onPostExecute(articles);
+
+            if (articles !=null){
+
+                //I sort the array even though the data provider already gives me the sorted data.
+                Collections.sort(Arrays.asList(articles), new Comparator<Article>() {
+                    @Override
+                    public int compare(Article article1, Article article2) {
+                        Calendar eventDate1 = Calendar.getInstance();
+                        Calendar eventDate2 = Calendar.getInstance();
+                        eventDate1.setTime(article1.getDate());
+                        eventDate2.setTime(article2.getDate());
+
+                        int month1 = eventDate1.get(Calendar.MONTH);
+                        int month2 = eventDate2.get(Calendar.MONTH);
+                        if (month1 != month2) return Integer.compare(month1, month2);
+                        int day1 = eventDate1.get(Calendar.DATE);
+                        int day2 = eventDate2.get(Calendar.DATE);
+                        return Integer.compare(day1, day2);
+                    }
+                });
+
+                articlesArray = articles;
+
+
+
+                if(dualPanel){
+                    showDetail(0);
+                }
+
+                final ArticlesAdapter adapter = new ArticlesAdapter(articles, dualPanel);
+                adapter.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        showDetail(recyclerView.getChildAdapterPosition(v));
+                    }
+                });
+                recyclerView.setAdapter(adapter);
+            }
+        }
+    }
+
+
+
+
+
+    private static class InsertTask extends AsyncTask<Article, Void, Void> {
+
+        @Override
+        protected Void doInBackground(Article... articles) {
+            db.ArticlesDao().insert(articles[0]);
+            return null;
+        }
     }
 
     private void setLoading(boolean loading) {
@@ -156,11 +252,6 @@ public class ArticlesListFragment extends Fragment {
 
         if (dualPanel) {
 
-            Article articleDetail;
-            if (articlesArray != null) {
-                articleDetail = articlesArray[position];
-            }
-
 
             ArticleDetailFragment articleDetailFragment = ArticleDetailFragment.newInstace(articlesArray[position].getAuthor(),
                     articlesArray[position].getTitle(), articlesArray[position].getDescription(), articlesArray[position].getUrl(),
@@ -185,6 +276,28 @@ public class ArticlesListFragment extends Fragment {
             startActivity(intent);
         }
 
+    }
+
+
+    private void deleteArticles() {
+
+        db = Room.databaseBuilder(getActivity().getApplicationContext(), ArticlesDatabase.class, DB_NAME).build();
+        DeleteNewsAsyncTask selectAsyncTask = new DeleteNewsAsyncTask();
+        selectAsyncTask.execute();
+
+
+    }
+
+    private static class DeleteNewsAsyncTask extends AsyncTask<Void, Void, Void> {
+
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+
+            db.ArticlesDao().deleteAll();
+
+            return null;
+        }
     }
 
 

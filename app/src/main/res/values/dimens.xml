@@ -5,4 +5,19 @@
     <dimen name="nav_header_vertical_spacing">8dp</dimen>
     <dimen name="nav_header_height">1dp</dimen>
     <dimen name="fab_margin">170dp</dimen>
+    <dimen name="landFrame">170dp</dimen>
+    <dimen name="detailImageHeight">220dp</dimen>
+    <dimen name="marginTextTitleDetail">10dp</dimen>
+    <dimen name="marginTextDescriptionDetail">10dp</dimen>
+    <dimen name="titleSizeDetail">25dp</dimen>
+    <dimen name="descriptionTextSizeDetail">15dp</dimen>
+    <dimen name="viewDetailSeparator">2dp</dimen>
+    <dimen name="marginView">10dp</dimen>
+    <dimen name="marginViewEnd">10dp</dimen>
+    <dimen name="titleMargin">20dp</dimen>
+    <dimen name="titleSizeText">17dp</dimen>
+    <dimen name="rowViewSeparatosMargin">10dp</dimen>
+    <dimen name="heightViewSeparator">2dp</dimen>
+    <dimen name="marginDescriptionRow">20dp</dimen>
+    <dimen name="sizeDescriptionRow">14dp</dimen>
 </resources>
