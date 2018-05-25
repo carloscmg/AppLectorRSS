@@ -13,15 +13,16 @@ import com.example.carlo.applectorrss.model.Article;
 import com.example.carlo.applectorrss.model.Articles;
 import com.squareup.picasso.Picasso;
 
-public class ArticlesAdapter  extends RecyclerView.Adapter<ArticlesAdapter.ArticlesViewHolder> {
+public class ArticlesAdapter  extends RecyclerView.Adapter<ArticlesAdapter.ArticlesViewHolder> implements View.OnClickListener {
 
-    private Context context;
-    private Articles articles;
+    private final boolean dualPanel;
+    private Article[] articles;
+    private View.OnClickListener listener;
 
 
-    public ArticlesAdapter(Context context, Articles articles) {
-        this.context = context;
+    public ArticlesAdapter(Article[] articles, boolean dualPanel) {
         this.articles = articles;
+        this.dualPanel = dualPanel;
     }
 
     @Override
@@ -30,44 +31,56 @@ public class ArticlesAdapter  extends RecyclerView.Adapter<ArticlesAdapter.Artic
         View itemView = LayoutInflater.from(viewGroup.getContext())
                 .inflate(R.layout.row_recycler, viewGroup, false);
 
-        return new ArticlesViewHolder(context, itemView);
+        itemView.setOnClickListener(this);
+
+        return new ArticlesViewHolder(itemView);
     }
 
     @Override
     public void onBindViewHolder(ArticlesViewHolder viewHolder, int pos) {
-        Article article = articles.getArticles()[pos];
-        viewHolder.bindArticle(article);
+        Article article = articles[pos];
+        viewHolder.title.setText(article.getTitle());
+        viewHolder.description.setText(article.getDescription());
+
+        if (article.getImage() != null) {
+            Picasso.with(viewHolder.imageView.getContext()).load(article.getImage()).into(viewHolder.imageView);
+        }
+
     }
 
     @Override
     public int getItemCount() {
-        return articles.getArticles().length;
+        return articles.length;
     }
 
-    public static class ArticlesViewHolder
+
+
+    static class ArticlesViewHolder
             extends RecyclerView.ViewHolder {
 
         private ImageView imageView;
         private TextView title;
         private TextView description;
-        private Context vcontext;
 
-        public ArticlesViewHolder(Context context, View itemView) {
+        ArticlesViewHolder(View itemView) {
             super(itemView);
 
-            vcontext = context;
             imageView = itemView.findViewById(R.id.imageView);
             title = itemView.findViewById(R.id.title);
             description = itemView.findViewById(R.id.description);
         }
+    }
 
-        public void bindArticle(Article article) {
-            title.setText(article.getTitle());
-            description.setText(article.getDescription());
+    public void setOnClickListener(View.OnClickListener listener) {
+        this.listener = listener;
+    }
 
-            if (article.getImage() != null) {
-                Picasso.with(vcontext).load(article.getImage()).into(imageView);
-            }
+    @Override
+    public void onClick(View view) {
+        if (listener != null) {
+            listener.onClick(view);
         }
     }
+
+
 }
